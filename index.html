@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Performance Benchmarker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Stock Performance Benchmarker</h1>
+            <p class="subtitle">Compare any stock against major market benchmarks</p>
+        </header>
+
+        <main>
+            <!-- Ticker Input Section -->
+            <section class="input-section">
+                <h2>Enter a Stock Ticker</h2>
+                <p class="section-hint">Type any US stock ticker and hit Compare to see performance vs. benchmarks</p>
+
+                <div class="ticker-input-row">
+                    <div class="ticker-group">
+                        <label for="ticker-input">Ticker Symbol</label>
+                        <input type="text" id="ticker-input" placeholder="e.g. AAPL" maxlength="10" autocomplete="off" spellcheck="false">
+                    </div>
+                    <button class="action-btn compare-btn" id="compare-btn" onclick="handleCompare()">Compare</button>
+                </div>
+                <span id="input-status" class="save-status"></span>
+            </section>
+
+            <!-- Results Section -->
+            <section class="performance-section" id="results-section" style="display:none;">
+                <h2>Performance Comparison — <span id="results-ticker"></span></h2>
+                <p class="section-hint">All values are percentage returns for the given period</p>
+
+                <div class="table-container">
+                    <table class="performance-table" id="performance-table">
+                        <thead>
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Name</th>
+                                <th>1 Day</th>
+                                <th>1 Week</th>
+                                <th>1 Month</th>
+                                <th>3 Month</th>
+                                <th>6 Month</th>
+                                <th>1 Year</th>
+                                <th>YTD</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stocks-body">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-actions">
+                    <button class="action-btn refresh-btn" onclick="handleCompare()">Refresh Data</button>
+                    <span id="save-status" class="save-status"></span>
+                </div>
+            </section>
+
+            <!-- Legend -->
+            <section class="legend-section" id="legend-section" style="display:none;">
+                <h2>Benchmark Legend</h2>
+                <div class="legend-grid">
+                    <div class="legend-item"><span class="legend-ticker">SPY</span> S&P 500 ETF — Large-cap US equities</div>
+                    <div class="legend-item"><span class="legend-ticker">QQQ</span> Nasdaq-100 ETF — US tech &amp; growth</div>
+                    <div class="legend-item"><span class="legend-ticker">IWM</span> Russell 2000 ETF — US small-cap equities</div>
+                    <div class="legend-item"><span class="legend-ticker">EFA</span> iShares MSCI EAFE — International developed markets</div>
+                    <div class="legend-item"><span class="legend-ticker">GLD</span> SPDR Gold Shares — Gold price benchmark</div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Stock Performance Benchmarker &mdash; Data via Yahoo Finance</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
