@@ -10,7 +10,6 @@ const BENCHMARKS = [
     { ticker: 'QQQ', name: 'Nasdaq-100 ETF' },
     { ticker: 'IWM', name: 'Russell 2000 ETF' },
     { ticker: 'EFA', name: 'Intl Developed (EAFE)' },
-    { ticker: 'GOLD', name: 'Barrick Gold' },
     { ticker: 'IBIT', name: 'iShares Bitcoin Trust' },
     { ticker: '^GSPC', name: 'S&P 500 Index' },
     { ticker: '^SP500TR', name: 'S&P 500 Total Return' },
