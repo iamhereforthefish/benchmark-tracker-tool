@@ -6,11 +6,17 @@
 
 // Benchmark definitions
 const BENCHMARKS = [
-    { ticker: 'SPY', name: 'S&P 500' },
-    { ticker: 'QQQ', name: 'Nasdaq-100' },
-    { ticker: 'IWM', name: 'Russell 2000' },
+    { ticker: 'SPY', name: 'S&P 500 ETF' },
+    { ticker: 'QQQ', name: 'Nasdaq-100 ETF' },
+    { ticker: 'IWM', name: 'Russell 2000 ETF' },
     { ticker: 'EFA', name: 'Intl Developed (EAFE)' },
-    { ticker: 'GLD', name: 'Gold' }
+    { ticker: 'GLD', name: 'Gold' },
+    { ticker: '^GSPC', name: 'S&P 500 Index' },
+    { ticker: '^IXIC', name: 'Nasdaq Composite' },
+    { ticker: '^NDX', name: 'Nasdaq-100 Index' },
+    { ticker: '^RUT', name: 'Russell 2000 Index' },
+    { ticker: '^SP500TR', name: 'S&P 500 Total Return' },
+    { ticker: '^TYX', name: '30-Year Treasury Yield' }
 ];
 
 // Performance periods
@@ -123,7 +129,7 @@ function buildTable(allTickers) {
 
         PERIODS.forEach(period => {
             const cell = document.createElement('td');
-            cell.id = `perf-${stock.ticker}-${period}`;
+            cell.id = `perf-${safeTicker(stock.ticker)}-${period}`;
             cell.className = 'perf-cell';
             cell.textContent = 'Loading...';
             row.appendChild(cell);
@@ -133,9 +139,13 @@ function buildTable(allTickers) {
     });
 }
 
+function safeTicker(ticker) {
+    return ticker.replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
 function updateRow(ticker, performance) {
     PERIODS.forEach(period => {
-        const cell = document.getElementById(`perf-${ticker}-${period}`);
+        const cell = document.getElementById(`perf-${safeTicker(ticker)}-${period}`);
         if (!cell) return;
         const value = performance[period];
         if (value !== null && value !== undefined) {
@@ -151,7 +161,7 @@ function updateRow(ticker, performance) {
 
 function updateRowError(ticker) {
     PERIODS.forEach(period => {
-        const cell = document.getElementById(`perf-${ticker}-${period}`);
+        const cell = document.getElementById(`perf-${safeTicker(ticker)}-${period}`);
         if (!cell) return;
         cell.textContent = 'Error';
         cell.className = 'perf-cell error';
