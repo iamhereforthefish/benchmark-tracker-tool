@@ -243,6 +243,15 @@ section h2 {
     box-shadow: 0 4px 12px rgba(15, 42, 54, 0.4);
 }
 
+.export-btn {
+    background: #0F9D58;
+    color: var(--white);
+}
+
+.export-btn:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(15, 157, 88, 0.4);
+}
+
 .save-status {
     font-size: 0.9rem;
     font-weight: 500;
