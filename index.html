@@ -16,18 +16,41 @@
         <main>
             <!-- Ticker Input Section -->
             <section class="input-section">
-                <h2>Enter a Stock Ticker</h2>
-                <p class="section-hint">Type any US stock ticker and hit Compare to see performance vs. benchmarks</p>
+                <h2>Enter Stock Tickers</h2>
+                <p class="section-hint">Enter up to 3 tickers, select which benchmarks to include, then hit Compare</p>
 
                 <div class="ticker-input-row">
                     <div class="ticker-group">
-                        <label for="ticker-input">Ticker Symbol</label>
-                        <input type="text" id="ticker-input" placeholder="e.g. AAPL" maxlength="10" autocomplete="off" spellcheck="false">
+                        <label for="ticker-input-1">Ticker 1</label>
+                        <input type="text" id="ticker-input-1" placeholder="e.g. AAPL" maxlength="10" autocomplete="off" spellcheck="false">
+                    </div>
+                    <div class="ticker-group">
+                        <label for="ticker-input-2">Ticker 2</label>
+                        <input type="text" id="ticker-input-2" placeholder="e.g. MSFT" maxlength="10" autocomplete="off" spellcheck="false">
+                    </div>
+                    <div class="ticker-group">
+                        <label for="ticker-input-3">Ticker 3</label>
+                        <input type="text" id="ticker-input-3" placeholder="e.g. GOOGL" maxlength="10" autocomplete="off" spellcheck="false">
                     </div>
                     <button class="action-btn compare-btn" id="compare-btn" onclick="handleCompare()">Compare</button>
                     <button class="action-btn export-btn" id="export-btn" onclick="exportToSheets()" disabled>Export to Google Sheets</button>
                 </div>
                 <span id="input-status" class="save-status"></span>
+            </section>
+
+            <!-- Benchmark Selection Section -->
+            <section class="benchmark-section">
+                <h2>Select Benchmarks</h2>
+                <p class="section-hint">Check the benchmarks you want to compare against</p>
+
+                <div class="benchmark-grid" id="benchmark-grid">
+                    <!-- Populated by JavaScript -->
+                </div>
+
+                <div class="benchmark-actions">
+                    <button class="action-btn select-all-btn" onclick="toggleAllBenchmarks(true)">Select All</button>
+                    <button class="action-btn deselect-all-btn" onclick="toggleAllBenchmarks(false)">Deselect All</button>
+                </div>
             </section>
 
             <!-- Results Section -->
@@ -77,12 +100,6 @@
                     <div class="legend-item"><span class="legend-ticker">^NDXT</span> Nasdaq-100 Tech Index — Tech sector of Nasdaq-100</div>
                     <div class="legend-item"><span class="legend-ticker">^XCMP</span> Nasdaq Composite Total Return — All Nasdaq with dividends</div>
                     <div class="legend-item"><span class="legend-ticker">^RUTTR</span> Russell 2000 Total Return — Small-cap with dividends</div>
-                    <div class="legend-item"><span class="legend-ticker">^GDAXI</span> DAX — Germany's top 40 blue chips</div>
-                    <div class="legend-item"><span class="legend-ticker">^FTSE</span> FTSE 100 — UK's largest 100 companies</div>
-                    <div class="legend-item"><span class="legend-ticker">^M2EA</span> MSCI EMU Index — Eurozone equities</div>
-                    <div class="legend-item"><span class="legend-ticker">^G1Q0</span> STOXX Europe 600 — Broad European market</div>
-                    <div class="legend-item"><span class="legend-ticker">^G2Q0</span> STOXX Europe Mid 200 — European mid-caps</div>
-                    <div class="legend-item"><span class="legend-ticker">^G4Q0</span> STOXX Europe Small 200 — European small-caps</div>
                 </div>
             </section>
         </main>

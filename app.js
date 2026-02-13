@@ -1,6 +1,6 @@
 /**
  * Stock Performance Benchmarker
- * Compare any ticker against SPY, QQQ, IWM, EFA, GLD
+ * Compare up to 3 tickers against selectable benchmarks
  * Design matching defense-stocks-tracker
  */
 
@@ -16,13 +16,7 @@ const BENCHMARKS = [
     { ticker: '^SP500TR', name: 'S&P 500 Total Return' },
     { ticker: '^NDXT', name: 'Nasdaq-100 Tech Index' },
     { ticker: '^XCMP', name: 'Nasdaq Composite Total Return' },
-    { ticker: '^RUTTR', name: 'Russell 2000 Total Return' },
-    { ticker: '^GDAXI', name: 'DAX (Germany)' },
-    { ticker: '^FTSE', name: 'FTSE 100 (UK)' },
-    { ticker: '^M2EA', name: 'MSCI EMU Index' },
-    { ticker: '^G1Q0', name: 'STOXX Europe 600' },
-    { ticker: '^G2Q0', name: 'STOXX Europe Mid 200' },
-    { ticker: '^G4Q0', name: 'STOXX Europe Small 200' }
+    { ticker: '^RUTTR', name: 'Russell 2000 Total Return' }
 ];
 
 // Performance periods
@@ -45,41 +39,106 @@ const CORS_PROXIES = [
 ];
 
 let isLoading = false;
-let userTicker = '';
+let userTickers = [];
 
-// Enter key triggers compare
+// Init
 document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('ticker-input');
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') handleCompare();
-    });
-    input.focus();
+    buildBenchmarkCheckboxes();
+
+    // Enter key triggers compare on all 3 inputs
+    for (let i = 1; i <= 3; i++) {
+        document.getElementById(`ticker-input-${i}`).addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleCompare();
+        });
+    }
+    document.getElementById('ticker-input-1').focus();
 });
 
-async function handleCompare() {
-    const input = document.getElementById('ticker-input');
-    const ticker = input.value.trim().toUpperCase();
+// ========================================================
+// BENCHMARK CHECKBOXES
+// ========================================================
 
-    if (!ticker) {
-        showStatus('input-status', 'Please enter a ticker symbol', 'error');
+function buildBenchmarkCheckboxes() {
+    const grid = document.getElementById('benchmark-grid');
+    grid.innerHTML = '';
+
+    BENCHMARKS.forEach(b => {
+        const label = document.createElement('label');
+        label.className = 'benchmark-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `bm-${safeTicker(b.ticker)}`;
+        checkbox.value = b.ticker;
+        checkbox.checked = true; // all selected by default
+
+        const tickerSpan = document.createElement('span');
+        tickerSpan.className = 'bm-ticker';
+        tickerSpan.textContent = b.ticker;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'bm-name';
+        nameSpan.textContent = b.name;
+
+        label.appendChild(checkbox);
+        label.appendChild(tickerSpan);
+        label.appendChild(nameSpan);
+        grid.appendChild(label);
+    });
+}
+
+function toggleAllBenchmarks(checked) {
+    BENCHMARKS.forEach(b => {
+        const cb = document.getElementById(`bm-${safeTicker(b.ticker)}`);
+        if (cb) cb.checked = checked;
+    });
+}
+
+function getSelectedBenchmarks() {
+    return BENCHMARKS.filter(b => {
+        const cb = document.getElementById(`bm-${safeTicker(b.ticker)}`);
+        return cb && cb.checked;
+    });
+}
+
+// ========================================================
+// COMPARE
+// ========================================================
+
+async function handleCompare() {
+    // Gather up to 3 tickers
+    const tickers = [];
+    for (let i = 1; i <= 3; i++) {
+        const val = document.getElementById(`ticker-input-${i}`).value.trim().toUpperCase();
+        if (val) tickers.push(val);
+    }
+
+    if (tickers.length === 0) {
+        showStatus('input-status', 'Please enter at least one ticker symbol', 'error');
+        return;
+    }
+
+    const selectedBenchmarks = getSelectedBenchmarks();
+    if (selectedBenchmarks.length === 0 && tickers.length === 0) {
+        showStatus('input-status', 'Please select at least one benchmark or enter a ticker', 'error');
         return;
     }
 
     if (isLoading) return;
     isLoading = true;
-    userTicker = ticker;
+    userTickers = tickers;
 
     document.getElementById('compare-btn').disabled = true;
 
     // Show results section
     document.getElementById('results-section').style.display = '';
     document.getElementById('legend-section').style.display = '';
-    document.getElementById('results-ticker').textContent = ticker;
+    document.getElementById('results-ticker').textContent = tickers.join(', ');
 
-    // Build the table with user ticker + benchmarks
+    // Build ticker list: user tickers first, then selected benchmarks
     const allTickers = [
-        { ticker: ticker, name: ticker, isUser: true },
-        ...BENCHMARKS.map(b => ({ ...b, isUser: false }))
+        ...tickers.map(t => ({ ticker: t, name: t, isUser: true })),
+        ...selectedBenchmarks.map(b => ({ ...b, isUser: false }))
     ];
 
     buildTable(allTickers);
@@ -104,8 +163,6 @@ async function handleCompare() {
 
     isLoading = false;
     document.getElementById('compare-btn').disabled = false;
-
-    // Enable export button once data is loaded
     document.getElementById('export-btn').disabled = false;
 
     if (successCount === totalCount) {
@@ -299,7 +356,7 @@ async function fetchViaProxies(yahooUrl) {
 
 async function exportToSheets() {
     const table = document.getElementById('performance-table');
-    if (!table || !userTicker) {
+    if (!table || userTickers.length === 0) {
         showStatus('save-status', 'No data to export. Run a comparison first.', 'error');
         return;
     }
@@ -325,7 +382,7 @@ async function exportToSheets() {
     // Data cell style
     const dataCellStyle = {
         font: { name: 'Arial', size: 11 },
-        alignment: { horizontal: 'right', vertical: 'middle' },
+        alignment: { horizontal: 'center', vertical: 'middle' },
         border: {
             bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } }
         }
@@ -333,7 +390,7 @@ async function exportToSheets() {
 
     const labelCellStyle = {
         font: { name: 'Arial', size: 11, bold: true },
-        alignment: { horizontal: 'left', vertical: 'middle' },
+        alignment: { horizontal: 'center', vertical: 'middle' },
         border: {
             bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } }
         }
@@ -353,7 +410,7 @@ async function exportToSheets() {
     // Set column widths
     sheet.columns = [
         { width: 12 }, // Ticker
-        { width: 24 }, // Name
+        { width: 28 }, // Name
         { width: 12 }, // 1 Day
         { width: 12 }, // 1 Week
         { width: 12 }, // 1 Month
@@ -378,7 +435,7 @@ async function exportToSheets() {
         dataRow.eachCell((cell, colNumber) => {
             if (colNumber <= 2) {
                 cell.font = labelCellStyle.font;
-                cell.alignment = { horizontal: 'left', vertical: 'middle' };
+                cell.alignment = labelCellStyle.alignment;
             } else {
                 cell.font = { name: 'Arial', size: 11, bold: true };
                 cell.alignment = dataCellStyle.alignment;
@@ -410,7 +467,7 @@ async function exportToSheets() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `benchmark_${userTicker}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    a.download = `benchmark_${userTickers.join('_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
