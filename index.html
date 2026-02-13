@@ -25,6 +25,7 @@
                         <input type="text" id="ticker-input" placeholder="e.g. AAPL" maxlength="10" autocomplete="off" spellcheck="false">
                     </div>
                     <button class="action-btn compare-btn" id="compare-btn" onclick="handleCompare()">Compare</button>
+                    <button class="action-btn export-btn" id="export-btn" onclick="exportToSheets()" disabled>Export to Google Sheets</button>
                 </div>
                 <span id="input-status" class="save-status"></span>
             </section>
@@ -57,7 +58,6 @@
 
                 <div class="table-actions">
                     <button class="action-btn refresh-btn" onclick="handleCompare()">Refresh Data</button>
-                    <button class="action-btn export-btn" id="export-btn" onclick="exportToSheets()">Export to Google Sheets</button>
                     <span id="save-status" class="save-status"></span>
                 </div>
             </section>

@@ -93,6 +93,9 @@ async function handleCompare() {
     isLoading = false;
     document.getElementById('compare-btn').disabled = false;
 
+    // Enable export button once data is loaded
+    document.getElementById('export-btn').disabled = false;
+
     if (successCount === totalCount) {
         showStatus('save-status', 'All data loaded!', 'success');
     } else {
