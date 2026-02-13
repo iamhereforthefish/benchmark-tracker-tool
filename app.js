@@ -6,17 +6,23 @@
 
 // Benchmark definitions
 const BENCHMARKS = [
-    { ticker: 'SPY', name: 'S&P 500 ETF' },
+    { ticker: 'VOO', name: 'Vanguard S&P 500 ETF' },
     { ticker: 'QQQ', name: 'Nasdaq-100 ETF' },
     { ticker: 'IWM', name: 'Russell 2000 ETF' },
     { ticker: 'EFA', name: 'Intl Developed (EAFE)' },
-    { ticker: 'GLD', name: 'Gold' },
+    { ticker: 'GOLD', name: 'Barrick Gold' },
+    { ticker: 'IBIT', name: 'iShares Bitcoin Trust' },
     { ticker: '^GSPC', name: 'S&P 500 Index' },
-    { ticker: '^IXIC', name: 'Nasdaq Composite' },
-    { ticker: '^NDX', name: 'Nasdaq-100 Index' },
-    { ticker: '^RUT', name: 'Russell 2000 Index' },
     { ticker: '^SP500TR', name: 'S&P 500 Total Return' },
-    { ticker: '^TYX', name: '30-Year Treasury Yield' }
+    { ticker: '^NDXT', name: 'Nasdaq-100 Tech Index' },
+    { ticker: '^XCMP', name: 'Nasdaq Composite Total Return' },
+    { ticker: '^RUTTR', name: 'Russell 2000 Total Return' },
+    { ticker: '^GDAXI', name: 'DAX (Germany)' },
+    { ticker: '^FTSE', name: 'FTSE 100 (UK)' },
+    { ticker: '^M2EA', name: 'MSCI EMU Index' },
+    { ticker: '^G1Q0', name: 'STOXX Europe 600' },
+    { ticker: '^G2Q0', name: 'STOXX Europe Mid 200' },
+    { ticker: '^G4Q0', name: 'STOXX Europe Small 200' }
 ];
 
 // Performance periods
