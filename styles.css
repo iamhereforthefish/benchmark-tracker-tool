@@ -135,7 +135,7 @@ section h2 {
 .performance-table th,
 .performance-table td {
     padding: 1rem;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid var(--teal);
 }
 
@@ -177,7 +177,7 @@ section h2 {
 .performance-table .perf-cell {
     font-family: Arial, sans-serif;
     font-size: 0.95rem;
-    text-align: right;
+    text-align: center;
     font-weight: 600;
     white-space: nowrap;
 }
