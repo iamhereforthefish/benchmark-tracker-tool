@@ -238,83 +238,88 @@ async function fetchAllPerformance(ticker) {
     const performance = {};
     const now = Math.floor(Date.now() / 1000);
 
-    // Fetch 1-month daily data for 1d, 1w, 1m calculations
-    const data1m = await fetchYahooData(ticker, '1mo', '1d');
+    // Fetch 1-month daily adjusted close data for 1d and 1w
+    const data1m = await fetchYahooDaily(ticker, '1mo');
 
-    if (data1m && data1m.closes.length >= 2) {
-        const closes = data1m.closes;
+    if (data1m && data1m.adjCloses.length >= 2) {
+        const closes = data1m.adjCloses;
         const currentPrice = closes[closes.length - 1];
 
-        // 1 Day
+        // 1 Day: last two adjusted closes
         if (closes.length >= 2) {
             const prev = closes[closes.length - 2];
             if (prev) performance['1d'] = ((currentPrice - prev) / prev) * 100;
         }
 
-        // 1 Week (~5 trading days)
-        if (closes.length >= 6) {
-            const weekAgo = closes[closes.length - 6];
+        // 1 Week: go back 7 entries (~7 trading days)
+        if (closes.length >= 8) {
+            const weekAgo = closes[closes.length - 8];
+            if (weekAgo) performance['1w'] = ((currentPrice - weekAgo) / weekAgo) * 100;
+        } else if (closes.length >= 2) {
+            // Fallback if less than 8 entries: use earliest available
+            const weekAgo = closes[0];
             if (weekAgo) performance['1w'] = ((currentPrice - weekAgo) / weekAgo) * 100;
         }
-
-        // 1 Month (first close in the 1mo data)
-        const firstValid1m = closes.find(p => p !== null);
-        if (firstValid1m) performance['1m'] = ((currentPrice - firstValid1m) / firstValid1m) * 100;
     }
 
-    // Fetch longer periods via period1/period2
-    const currentPrice = await getCurrentPrice(ticker);
+    // Get current adjusted close price
+    const currentPrice = await getCurrentAdjClose(ticker);
     if (currentPrice === null) return performance;
 
-    // 3 Month
-    const threeMonthsAgo = now - (90 * 24 * 60 * 60);
-    const p3m = await fetchFirstPrice(ticker, threeMonthsAgo, now);
+    // 1 Month: daily adjusted close from 30 days ago
+    const thirtyDaysAgo = now - (30 * 24 * 60 * 60);
+    const p1m = await fetchFirstAdjClose(ticker, thirtyDaysAgo, now);
+    if (p1m) performance['1m'] = ((currentPrice - p1m) / p1m) * 100;
+
+    // 3 Month: daily adjusted close from 90 days ago
+    const ninetyDaysAgo = now - (90 * 24 * 60 * 60);
+    const p3m = await fetchFirstAdjClose(ticker, ninetyDaysAgo, now);
     if (p3m) performance['3m'] = ((currentPrice - p3m) / p3m) * 100;
 
-    // 6 Month
-    const sixMonthsAgo = now - (182 * 24 * 60 * 60);
-    const p6m = await fetchFirstPrice(ticker, sixMonthsAgo, now);
+    // 6 Month: daily adjusted close from 180 days ago
+    const sixMonthsAgo = now - (180 * 24 * 60 * 60);
+    const p6m = await fetchFirstAdjClose(ticker, sixMonthsAgo, now);
     if (p6m) performance['6m'] = ((currentPrice - p6m) / p6m) * 100;
 
-    // 1 Year
+    // 1 Year: daily adjusted close from 365 days ago
     const oneYearAgo = now - (365 * 24 * 60 * 60);
-    const p1y = await fetchFirstPrice(ticker, oneYearAgo, now);
+    const p1y = await fetchFirstAdjClose(ticker, oneYearAgo, now);
     if (p1y) performance['1y'] = ((currentPrice - p1y) / p1y) * 100;
 
-    // YTD
-    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-    const ytdStart = Math.floor(startOfYear.getTime() / 1000);
-    const pYtd = await fetchFirstPrice(ticker, ytdStart, now);
+    // YTD: daily adjusted close from Dec 31 of prior year
+    const dec31 = new Date(new Date().getFullYear() - 1, 11, 31);
+    const ytdStart = Math.floor(dec31.getTime() / 1000);
+    const pYtd = await fetchFirstAdjClose(ticker, ytdStart, now);
     if (pYtd) performance['ytd'] = ((currentPrice - pYtd) / pYtd) * 100;
 
     return performance;
 }
 
-async function getCurrentPrice(ticker) {
-    const data = await fetchYahooData(ticker, '5d', '1d');
-    if (!data || data.closes.length === 0) return null;
-    for (let i = data.closes.length - 1; i >= 0; i--) {
-        if (data.closes[i] !== null) return data.closes[i];
+async function getCurrentAdjClose(ticker) {
+    const data = await fetchYahooDaily(ticker, '5d');
+    if (!data || data.adjCloses.length === 0) return null;
+    for (let i = data.adjCloses.length - 1; i >= 0; i--) {
+        if (data.adjCloses[i] !== null) return data.adjCloses[i];
     }
     return null;
 }
 
-async function fetchFirstPrice(ticker, period1, period2) {
-    const data = await fetchYahooByPeriod(ticker, period1, period2);
-    if (!data || data.closes.length === 0) return null;
-    for (let i = 0; i < data.closes.length; i++) {
-        if (data.closes[i] !== null) return data.closes[i];
+async function fetchFirstAdjClose(ticker, period1, period2) {
+    const data = await fetchYahooDailyByPeriod(ticker, period1, period2);
+    if (!data || data.adjCloses.length === 0) return null;
+    for (let i = 0; i < data.adjCloses.length; i++) {
+        if (data.adjCloses[i] !== null) return data.adjCloses[i];
     }
     return null;
 }
 
-async function fetchYahooData(ticker, range, interval) {
-    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=${range}&interval=${interval}`;
+async function fetchYahooDaily(ticker, range) {
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=${range}&interval=1d`;
     return await fetchViaProxies(yahooUrl);
 }
 
-async function fetchYahooByPeriod(ticker, period1, period2) {
-    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${period1}&period2=${period2}&interval=1wk`;
+async function fetchYahooDailyByPeriod(ticker, period1, period2) {
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${period1}&period2=${period2}&interval=1d`;
     return await fetchViaProxies(yahooUrl);
 }
 
@@ -336,9 +341,12 @@ async function fetchViaProxies(yahooUrl) {
 
                 if (!data.chart?.result?.[0]) continue;
                 const result = data.chart.result[0];
+                // Use adjusted close if available, fall back to regular close
+                const adjClose = result.indicators.adjclose?.[0]?.adjclose;
+                const regularClose = result.indicators.quote[0].close || [];
                 return {
                     timestamps: result.timestamp || [],
-                    closes: result.indicators.quote[0].close || []
+                    adjCloses: adjClose || regularClose
                 };
             } catch (error) {
                 continue;
