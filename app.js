@@ -251,12 +251,20 @@ async function fetchAllPerformance(ticker) {
             if (prev) performance['1d'] = ((currentPrice - prev) / prev) * 100;
         }
 
-        // 1 Week: go back 7 entries (~7 trading days)
-        if (closes.length >= 8) {
-            const weekAgo = closes[closes.length - 8];
-            if (weekAgo) performance['1w'] = ((currentPrice - weekAgo) / weekAgo) * 100;
+        // 1 Week: last trading day at or before 7 calendar days ago
+        const sevenDaysAgo = now - (7 * 24 * 60 * 60);
+        const timestamps = data1m.timestamps;
+        let weekIdx = -1;
+        for (let i = timestamps.length - 1; i >= 0; i--) {
+            if (timestamps[i] <= sevenDaysAgo) {
+                weekIdx = i;
+                break;
+            }
+        }
+        if (weekIdx >= 0 && closes[weekIdx]) {
+            performance['1w'] = ((currentPrice - closes[weekIdx]) / closes[weekIdx]) * 100;
         } else if (closes.length >= 2) {
-            // Fallback if less than 8 entries: use earliest available
+            // Fallback: use earliest available
             const weekAgo = closes[0];
             if (weekAgo) performance['1w'] = ((currentPrice - weekAgo) / weekAgo) * 100;
         }
